@@ -123,7 +123,7 @@ Theorem bequiv_example:
     <{ X - X = 0 }>
     <{ true }>.
 Proof.
-  intros st. unfold beval.
+  unfold bequiv. intros st. unfold beval.
   rewrite aequiv_example. reflexivity.
 Qed.
 
@@ -142,6 +142,8 @@ Qed.
 Definition cequiv (c1 c2 : com) : Prop :=
   forall (st st' : state),
     (st =[ c1 ]=> st') <-> (st =[ c2 ]=> st').
+
+Locate ceval.
 
 (** We can also define an asymmetric variant of this relation: We say
     that [c1] _refines_ [c2] if they produce the same final states
@@ -185,9 +187,7 @@ Theorem skip_right : forall c,
   cequiv
     <{ c ; skip }>
     c.
-Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+Proof. Admitted.
 
 (** Similarly, here is a simple equivalence that optimizes [if]
     commands: *)
