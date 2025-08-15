@@ -1481,7 +1481,16 @@ Proof.
 Theorem inequiv_exercise:
   ~ cequiv <{ while true do skip end }> <{ skip }>.
 Proof.
-  Search(cequiv _ <{ skip }>). Check while_false. apply while_false. destruct H.
+  unfold cequiv. intros H.
+assert (H1: forall st st', ~( st =[ while true do skip end ]=> st' )).
+{ intros. apply while_true_nonterm. apply refl_bequiv. }
+  assert (H2: exists st st', st =[ skip ]=> st').
+    { exists empty_st. exists empty_st. apply E_Skip. }
+  destruct H2 as [st [st' H2]].
+  apply (H1 st st').
+  apply H.
+  assumption.
+Qed.
 
 (* ################################################################# *)
 (** * Extended Exercise: Nondeterministic Imp *)
