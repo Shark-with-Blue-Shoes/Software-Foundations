@@ -382,8 +382,9 @@ Theorem hoare_post_true : forall (P Q : Assertion) c,
   (forall st, Q st) ->
   {{P}} c {{Q}}.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+unfold valid_hoare_triple. intros.
+apply H.
+Qed.
 
 (** **** Exercise: 1 star, standard (hoare_pre_false) *)
 
@@ -394,8 +395,9 @@ Theorem hoare_pre_false : forall (P Q : Assertion) c,
   (forall st, ~ (P st)) ->
   {{P}} c {{Q}}.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+unfold valid_hoare_triple. intros.
+apply H in H1. exfalso. assumption. 
+Qed.
 
 (* ################################################################# *)
 (** * Proof Rules *)
@@ -639,7 +641,9 @@ Module ExampleAssertionSub.
 Example equivalent_assertion1 :
   {{ (X <= 5) [X |-> 3] }} <<->> {{ 3 <= 5 }}.
 Proof.
-  split; unfold assert_implies, assertion_sub; intros st H; simpl in *; apply H.
+  split; unfold assert_implies; unfold assertion_sub; intros st H. 
+  - simpl. lia.
+  - simpl. apply H.
 Qed.
 
 Example equivalent_assertion2 :
@@ -693,7 +697,10 @@ Example hoare_asgn_examples1 :
       X := 2 * X
     {{ X <= 10 }}.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  exists {{ (X <= 10) [X |-> 2 * X] }}.
+  apply hoare_asgn.
+Qed.
+
 (** [] *)
 
 (** **** Exercise: 2 stars, standard, optional (hoare_asgn_examples2) *)
@@ -702,8 +709,10 @@ Example hoare_asgn_examples2 :
     {{ P }}
       X := 3
     {{ 0 <=  X /\ X <= 5 }}.
-Proof. (* FILL IN HERE *) Admitted.
-(** [] *)
+Proof.
+  exists {{ (0 <=  X /\ X <= 5) [X |-> 3] }}.
+  apply hoare_asgn.
+Qed.
 
 (** **** Exercise: 2 stars, standard, especially useful (hoare_asgn_wrong) *)
 
@@ -724,10 +733,16 @@ Proof. (* FILL IN HERE *) Admitted.
 Theorem hoare_asgn_wrong : exists a:aexp,
   ~ {{ True }} X := a {{ X = a }}.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(* FILL IN HERE
-
-    [] *)
+  exists <{ X + 1 }>.
+  intros H.
+  assert (contra: (X:Aexp) (X !-> 1; X !-> 0) = (<{ X + 1 }>:Aexp) (X !-> 1; X !-> 0)).
+  {
+    apply H with (st := (X !-> 0)).
+    - constructor. reflexivity.
+    - apply I.
+  }
+  discriminate contra.
+Qed.
 
 (** **** Exercise: 3 stars, advanced (hoare_asgn_fwd)
 
@@ -755,8 +770,13 @@ Theorem hoare_asgn_fwd :
   {{ $(fun st => (P (X !-> m ; st)
              /\ st X = aeval (X !-> m ; st) a))  }}.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+intros m a P st st' Hceval HP. destruct HP.
+inversion Hceval; subst. Check t_update_shadow.
+rewrite t_update_shadow. replace m with ((m:Aexp) st) by reflexivity.
+rewrite <- H0. Check t_update_same. rewrite t_update_same. split.
+- assumption. 
+- rewrite t_update_eq; reflexivity.
+Qed.
 
 (** **** Exercise: 2 stars, advanced, optional (hoare_asgn_fwd_exists)
 
@@ -778,8 +798,12 @@ Theorem hoare_asgn_fwd_exists :
   {{ $(fun st => exists m, P (X !-> m ; st) /\
                 st X = aeval (X !-> m ; st) a) }}.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+intros a P st st' Hceval HP. inversion Hceval; subst.
+exists (st X). split. 
+- rewrite t_update_shadow; rewrite t_update_same; assumption.
+- rewrite t_update_shadow. rewrite t_update_same.
+rewrite t_update_eq. reflexivity.
+Qed.
 
 (* ================================================================= *)
 (** ** Consequence *)
@@ -1109,14 +1133,20 @@ Example assertion_sub_ex1' :
     X := 2 * X
   {{ X <= 10 }}.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  eapply hoare_consequence_pre.
+  - apply hoare_asgn.
+  - assertion_auto.
+Qed.
 
 Example assertion_sub_ex2' :
   {{ 0 <= 3 /\ 3 <= 5 }}
     X := 3
   {{ 0 <= X /\ X <= 5 }}.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  eapply hoare_consequence_pre.
+  - apply hoare_asgn.
+  - assertion_auto.
+Qed.
 
 (** [] *)
 
@@ -1180,7 +1210,13 @@ Example hoare_asgn_example4 :
   {{ X = 1 /\ Y = 2 }}.
 Proof.
   eapply hoare_seq with (Q := {{ X = 1 }}).
-  (* FILL IN HERE *) Admitted.
+  - eapply hoare_consequence_pre.
+    + apply hoare_asgn.
+    + assertion_auto.
+  - eapply hoare_consequence_pre.
+    + apply hoare_asgn.
+    + assertion_auto.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard (swap_exercise)
@@ -1201,16 +1237,21 @@ Proof.
          and work back to the beginning of your program.
        - Remember that [eapply] is your friend.)  *)
 
-Definition swap_program : com
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition swap_program : com := <{X := X+Y; Y := X-Y; X:= X-Y}>.
 
 Theorem swap_exercise :
   {{X <= Y}}
     swap_program
   {{Y <= X}}.
 Proof.
-  (* FILL IN HERE *) Admitted.
-(** [] *)
+eapply hoare_seq.
+- eapply hoare_seq.
+  + apply hoare_asgn.
+  + apply hoare_asgn.
+- eapply hoare_consequence_pre.
+  + apply hoare_asgn.
+  + assertion_auto.
+Qed.
 
 (** **** Exercise: 4 stars, advanced (invalid_triple)
 
