@@ -186,14 +186,10 @@ Theorem skip_right : forall c,
     <{ c ; skip }>
     c.
 Proof.
-  unfold cequiv. split.
-  - intro H. inversion H; subst.
-    inversion H5; subst.
-     assumption.
-  - intro H. apply E_Seq with (st'). * assumption.
-    * apply E_Skip.
-Qed.
-    (** Similarly, here is a simple equivalence that optimizes [if]
+  (* FILL IN HERE *) Admitted.
+(** [] *)
+
+(** Similarly, here is a simple equivalence that optimizes [if]
     commands: *)
 
 Theorem if_true_simple : forall c1 c2,
@@ -282,17 +278,8 @@ Theorem if_false : forall b c1 c2,
     <{ if b then c1 else c2 end }>
     c2.
 Proof.
- intros b c1 c2 Hb.
-  split; intros H.
-  - (* -> *)
-    inversion H; subst.
-    + unfold bequiv in Hb. simpl in Hb.
-      rewrite Hb in H5. discriminate.
-    + assumption.
-  - apply E_IfFalse. 
-    + unfold bequiv in Hb. auto.
-    + assumption.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 3 stars, standard (swap_if_branches)
 
@@ -304,18 +291,8 @@ Theorem swap_if_branches : forall b c1 c2,
     <{ if b then c1 else c2 end }>
     <{ if ~ b then c2 else c1 end }>.
 Proof.
-  unfold cequiv; split; intro H.
-  - inversion H; subst. 
-    + apply E_IfFalse.
-      * simpl; apply negb_false_iff; assumption.
-      * assumption.
-    + apply E_IfTrue. 
-      * simpl. apply negb_true_iff; assumption.
-      * assumption.
-  - inversion H; subst.
-    + simpl in H5; apply negb_true_iff in H5; apply E_IfFalse; assumption.
-    + simpl in H5; apply negb_false_iff in H5; apply E_IfTrue; assumption.
-Qed. 
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** For [while] loops, we can give a similar pair of theorems.  A loop
     whose guard is equivalent to [false] is equivalent to [skip],
@@ -417,10 +394,8 @@ Theorem while_true : forall b c,
     <{ while b do c end }>
     <{ while true do skip end }>.
 Proof.
-intros b c Hb st st'.
-  split; intros H; apply while_true_nonterm in H; exfalso; try assumption;
-  apply while_true_nonterm in H; try assumption. unfold bequiv; reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** A more interesting fact about [while] commands is that any number
     of copies of the body can be "unrolled" without changing meaning.
@@ -463,15 +438,8 @@ Proof.
 Theorem seq_assoc : forall c1 c2 c3,
   cequiv <{(c1;c2);c3}> <{c1;(c2;c3)}>.
 Proof.
-  split; intro H; inversion H; subst.
-  - inversion H2; subst.
-    apply E_Seq with (st':=st'1); try assumption.
-    apply E_Seq with (st':=st'0); try assumption.
-  - inversion H5; subst.
-    apply E_Seq with st'1.
-    + apply E_Seq with st'0; assumption.
-    + assumption.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** Proving program properties involving assignments is one place
     where the fact that program states are treated extensionally
@@ -499,14 +467,8 @@ Theorem assign_aequiv : forall (X : string) (a : aexp),
   aequiv <{ X }> a ->
   cequiv <{ skip }> <{ X := a }>.
 Proof.
-intros X a Ha.
-  unfold aequiv in Ha.
-  split; intro H; inversion H; subst; clear H.
-  - assert (H : st' =[ X := a ]=> (X !-> st' X ; st')).
-  { constructor. rewrite <- Ha. reflexivity. }
-    rewrite t_update_same in H. assumption.
-  - rewrite <- (Ha st). rewrite t_update_same. constructor.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 2 stars, standard (equiv_classes) *)
 
@@ -763,14 +725,8 @@ Theorem CSeq_congruence : forall c1 c1' c2 c2',
   cequiv c1 c1' -> cequiv c2 c2' ->
   cequiv <{ c1;c2 }> <{ c1';c2' }>.
 Proof.
-  split; intros H1; inversion H1; subst.
-  - apply E_Seq with st'0. 
-    + apply H; assumption.
-    + apply H0; assumption.
-  - apply E_Seq with st'0. 
-    + apply H; assumption.
-    + apply H0; assumption.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 3 stars, standard (CIf_congruence) *)
 Theorem CIf_congruence : forall b b' c1 c1' c2 c2',
@@ -778,22 +734,10 @@ Theorem CIf_congruence : forall b b' c1 c1' c2 c2',
   cequiv <{ if b then c1 else c2 end }>
          <{ if b' then c1' else c2' end }>.
 Proof.
-  split; intro H2. 
-  - inversion H2; subst. 
-    +  apply E_IfTrue. 
-      { rewrite <- H; assumption. }
-      apply H0; assumption.
-    + apply E_IfFalse. { rewrite <- H; assumption. }
-      apply H1; assumption.
-  - inversion H2; subst. 
-    +  apply E_IfTrue. 
-      { rewrite H; assumption. }
-      apply H0; assumption.
-    + apply E_IfFalse. { rewrite H; assumption. }
-      apply H1; assumption.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
-      (** For example, here are two equivalent programs and a proof of their
+(** For example, here are two equivalent programs and a proof of their
     equivalence using these congruence theorems... *)
 
 Example congruence_example:
@@ -1171,25 +1115,9 @@ Proof.
        become constants after folding *)
       simpl. destruct (n =? n0); reflexivity.
   - (* BLe *)
-    simpl.
-    remember (fold_constants_aexp a1) as a1' eqn:Heqa1'.
-    remember (fold_constants_aexp a2) as a2' eqn:Heqa2'.
-    replace (aeval st a1) with (aeval st a1') by
-       (subst a1'; rewrite <- fold_constants_aexp_sound; reflexivity).
-    replace (aeval st a2) with (aeval st a2') by
-       (subst a2'; rewrite <- fold_constants_aexp_sound; reflexivity).
-      destruct a1'; destruct a2'; try reflexivity.
-      simpl. destruct (n <=? n0); reflexivity.
+    (* FILL IN HERE *) admit.
   - (* BGt *)
-    simpl.
-    remember (fold_constants_aexp a1) as a1' eqn:Heqa1'.
-    remember (fold_constants_aexp a2) as a2' eqn:Heqa2'.
-    replace (aeval st a1) with (aeval st a1') by
-       (subst a1'; rewrite <- fold_constants_aexp_sound; reflexivity).
-    replace (aeval st a2) with (aeval st a2') by
-       (subst a2'; rewrite <- fold_constants_aexp_sound; reflexivity).
-      destruct a1'; destruct a2'; try reflexivity.
-      simpl. destruct (n <=? n0); reflexivity.
+    (* FILL IN HERE *) admit.
   - (* BNot *)
     simpl. remember (fold_constants_bexp b) as b' eqn:Heqb'.
     rewrite IHb.
@@ -1200,7 +1128,8 @@ Proof.
     remember (fold_constants_bexp b2) as b2' eqn:Heqb2'.
     rewrite IHb1. rewrite IHb2.
     destruct b1'; destruct b2'; reflexivity.
-Qed.
+(* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 3 stars, standard (fold_constants_com_sound)
 
@@ -1230,14 +1159,8 @@ Proof.
       apply trans_cequiv with c2; try assumption.
       apply if_false; assumption.
   - (* while *)
-    assert (bequiv b (fold_constants_bexp b)). {
-      apply fold_constants_bexp_sound. }
-    destruct (fold_constants_bexp b) eqn:Heqb;
-      try (apply CWhile_congruence; assumption).
-    + apply while_true; assumption.
-    + apply while_false; assumption.
-Qed.
-  
+    (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (* ================================================================= *)
 (** ** Soundness of (0 + n) Elimination, Redux *)
@@ -1481,16 +1404,8 @@ Proof.
 Theorem inequiv_exercise:
   ~ cequiv <{ while true do skip end }> <{ skip }>.
 Proof.
-  unfold cequiv. intros H.
-assert (H1: forall st st', ~( st =[ while true do skip end ]=> st' )).
-{ intros. apply while_true_nonterm. apply refl_bequiv. }
-  assert (H2: exists st st', st =[ skip ]=> st').
-    { exists empty_st. exists empty_st. apply E_Skip. }
-  destruct H2 as [st [st' H2]].
-  apply (H1 st st').
-  apply H.
-  assumption.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (* ################################################################# *)
 (** * Extended Exercise: Nondeterministic Imp *)

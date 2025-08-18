@@ -100,8 +100,6 @@ Check String.eqb_spec :
 
 Definition total_map (A : Type) := string -> A.
 
-(*returns A*)
-
 (** Intuitively, a total map over an element type [A] is just a
     function that can be used to look up [string]s, yielding [A]s. *)
 
@@ -147,7 +145,7 @@ Example example_empty := (_ !-> false).
 (** We next introduce a convenient notation for extending an existing
     map with a new binding. *)
 Notation "x '!->' v ';' m" := (t_update m x v)
-                              (at level 100, v at next level, right associativity).
+                                (at level 100, x constr, right associativity).
 
 (** The [examplemap] above can now be defined as follows: *)
 
@@ -190,8 +188,8 @@ Proof. reflexivity. Qed.
 Lemma t_apply_empty : forall (A : Type) (x : string) (v : A),
   (_ !-> v) x = v.
 Proof.
-intros. reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 2 stars, standard, optional (t_update_eq)
 
@@ -202,9 +200,9 @@ Qed.
 Lemma t_update_eq : forall (A : Type) (m : total_map A) x v,
   (x !-> v ; m) x = v.
 Proof.
-  intros. unfold t_update. rewrite String.eqb_refl. reflexivity.
-Qed.
-  
+  (* FILL IN HERE *) Admitted.
+(** [] *)
+
 (** **** Exercise: 2 stars, standard, optional (t_update_neq)
 
     On the other hand, if we update a map [m] at a key [x1] and then
@@ -215,10 +213,8 @@ Theorem t_update_neq : forall (A : Type) (m : total_map A) x1 x2 v,
   x1 <> x2 ->
   (x1 !-> v ; m) x2 = m x2.
 Proof.
-intros A m x1 x2 v H. unfold t_update. destruct (eqb_spec x1 x2).
-- exfalso. apply H. apply e.
-- reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 2 stars, standard, optional (t_update_shadow)
 
@@ -231,12 +227,8 @@ Qed.
 Lemma t_update_shadow : forall (A : Type) (m : total_map A) x v1 v2,
   (x !-> v2 ; x !-> v1 ; m) = (x !-> v2 ; m).
 Proof.
-  intros. unfold t_update. apply functional_extensionality. intros x'.
-  destruct (eqb_spec x x'). (*eqb_spec returns an inductive proposition that
-  takes a question and returns a proposition*)
-  - reflexivity.
-  - reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 2 stars, standard (t_update_same)
 
@@ -252,20 +244,14 @@ Qed.
 Theorem t_update_same : forall (A : Type) (m : total_map A) x,
   (x !-> m x ; m) = m.
 Proof.
-  intros. apply functional_extensionality. intros. unfold t_update.
-  destruct (eqb_spec x x0). 
-  - rewrite e. reflexivity.
-  - reflexivity.
-Qed.
-  
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (** **** Exercise: 3 stars, standard, especially useful (t_update_permute)
 
     Similarly, use [String.eqb_spec] to prove one final property of
     the [update] function: If we update a map [m] at two distinct
     keys, it doesn't matter in which order we do the updates. *)
-
-(*whenever I have something like (x =? v) destruct eqb_spec*)
 
 Theorem t_update_permute : forall (A : Type) (m : total_map A)
                                   v1 v2 x1 x2,
@@ -274,18 +260,8 @@ Theorem t_update_permute : forall (A : Type) (m : total_map A)
   =
   (x2 !-> v2 ; x1 !-> v1 ; m).
 Proof.
-  intros A m v1 v2 x1 x2 H.
-  apply functional_extensionality.
-  intros x'.
-  unfold t_update.
-  destruct (eqb_spec x1 x') as [H1 | _].
-  - destruct (eqb_spec x2 x').
-    + exfalso. apply H. rewrite e. symmetry. apply H1.
-    + reflexivity.
-  - destruct (eqb_spec x2 x') as [H1 | _].
-    + reflexivity.
-    + reflexivity.
-Qed.
+  (* FILL IN HERE *) Admitted.
+(** [] *)
 
 (* ################################################################# *)
 (** * Partial maps *)
@@ -302,14 +278,13 @@ Definition empty {A : Type} : partial_map A :=
 Definition update {A : Type} (m : partial_map A)
            (x : string) (v : A) :=
   (x !-> Some v ; m).
-
 (** We introduce a similar notation for partial maps: *)
 Notation "x '|->' v ';' m" := (update m x v)
-  (at level 100, v at next level, right associativity).
+  (at level 0, x constr, v at level 200, right associativity).
 
 (** We can also hide the last case when it is empty. *)
 Notation "x '|->' v" := (update empty x v)
-  (at level 100).
+  (at level 0, x constr, v at level 200).
 
 Definition examplepmap :=
   ("Church" |-> true ; "Turing" |-> false).
@@ -403,4 +378,4 @@ Qed.
     used to keep track of which program variables are defined in a
     given scope. *)
 
-(* 2025-01-13 16:00 *)
+(* 2025-01-06 19:48 *)
